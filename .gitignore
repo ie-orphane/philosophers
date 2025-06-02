@@ -1,0 +1,6 @@
+*
+!.gitignore
+!philo*/
+!*/*.[ch]
+!*/Makefile
+test*
