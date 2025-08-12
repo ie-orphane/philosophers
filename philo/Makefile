@@ -12,7 +12,7 @@ NAME = philo
 
 CC = cc
 CFLAGS = -Wall -Wextra -Werror
-FFLAGS = #-g3 -fsanitize=undefined -fsanitize=address #-fsanitize=thread
+FFLAGS = -g3 -fsanitize=undefined  -fsanitize=thread #-fsanitize=address
 
 INCLUDES = philo.h
 SOURCES = main.c philo.c utils.c

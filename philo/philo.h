@@ -6,7 +6,7 @@
 /*   By: ielyatim <ielyatim@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/09 15:23:55 by ielyatim          #+#    #+#             */
-/*   Updated: 2025/03/09 15:38:05 by ielyatim         ###   ########.fr       */
+/*   Updated: 2025/07/17 09:08:45 by ielyatim         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ typedef struct s_super
 	pthread_mutex_t		write;
 	bool				dead;
 	t_ulong				start_time;
+	pthread_t			trd;
 }						t_super;
 
 typedef struct s_philo
@@ -56,6 +57,7 @@ typedef struct s_philo
 	t_uint				num_of_meals;
 	t_ulong				start_time;
 	pthread_t			trd;
+	bool				thinking;
 	pthread_mutex_t		*write;
 	pthread_mutex_t		*lfork;
 	pthread_mutex_t		*rfork;
