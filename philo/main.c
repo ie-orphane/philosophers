@@ -12,84 +12,61 @@
 
 #include "philo.h"
 
-void	parse_args(int argc, char **argv, t_args *args)
+void	ft_err(const char *msg)
 {
-	const char	*args_name[] = {"number_of_philosophers", "time_to_die",
-			"time_to_eat", "time_to_sleep", "number_of_meals"};
-	int			i;
+	write(2, msg, strlen(msg));
+}
 
-	if (argc < 4 || argc > 5)
+static bool	ft_parse(int argc, char **argv)
+{
+	int	i;
+
+	if (argc < 5 || argc > 6)
 	{
-		printf("Usage: philo <number_of_philosophers> <time_to_die>"
-				" <time_to_eat> <time_to_sleep> [number_of_meals]\n");
-		exit(EXIT_FAILURE);
+		ft_err(RED "Error:" RESET " Invalid number of arguments.\n");
+		ft_err(YELLOW "\nUsage:" RESET "\n  philo <num_of_philos> <time");
+		ft_err("_to_die> <time_to_eat> <time_to_sleep> [num_of_meals]\n");
+		return (true);
 	}
-	memset(args, 0, sizeof(t_args));
-	i = 0;
+	i = 1;
 	while (i < argc)
 	{
-		*((unsigned int *)args + i) = ft_uatoi(argv[i]);
-		if (*((unsigned int *)args + i) == 0)
+		if (!ft_isnumeric(argv[i]))
 		{
-			printf(RED "Error:" RESET " invalid argument: " BOLD WHITE);
-			printf("%s:" RESET " %s\n", args_name[i], argv[i]);
-			exit(EXIT_FAILURE);
+			ft_err(RED "Error:" RESET " Invalid argument: " BOLD WHITE);
+			ft_err(argv[i]);
+			ft_err(RESET "\n");
+			return (false);
 		}
+		i++;
+	}
+	return (false);
+}
+
+void	ft_destroy(t_super *super)
+{
+	int	i;
+
+	pthread_mutex_destroy(&super->write_lock);
+	pthread_mutex_destroy(&super->meal_lock);
+	pthread_mutex_destroy(&super->dead_lock);
+	i = 0;
+	while (i < super->num_of_philos)
+	{
+		pthread_mutex_destroy(&super->forks[i]);
 		i++;
 	}
 }
 
-static void	*__manager(void *ptr)
-{
-	t_philo			**philos;
-	t_philo			*philo;
-	unsigned int	i;
-
-	philos = (t_philo **)ptr;
-	i = 0;
-	while (true)
-	{
-		philo = philos[i];
-		pthread_mutex_lock(philo->write);
-		if (philo->thinking && get_time()
-			- philo->start_time > philo->time_to_die)
-		{
-			printf("%lu %d has died\n", get_time() - philo->start_time,
-				philo->id);
-			philos_destroy(philos, philo->num_of_philos);
-			exit(EXIT_FAILURE);
-		}
-		pthread_mutex_unlock(philo->write);
-		i = (i + 1) % philo->num_of_philos;
-	}
-	return (NULL);
-}
-
 int	main(int argc, char **argv)
 {
-	t_args			args;
-	unsigned int	i;
-	t_philo			**philos;
-	pthread_mutex_t	*forks;
-	t_super			super;
+	t_super	super;
 
-	parse_args(argc - 1, argv + 1, &args);
-	super.start_time = get_time();
-	forks = ft_calloc(args.num_of_philos * sizeof(pthread_mutex_t));
-	i = args.num_of_philos;
-	while (i-- > 0)
-		pthread_mutex_init(&forks[i], NULL);
-	pthread_mutex_init(&super.write, NULL);
-	philos = philos_init(args, forks, super.start_time);
-	pthread_create(&(super.trd), NULL, &__manager, philos);
-	pthread_join(super.trd, NULL);
-	i = args.num_of_philos;
-	while (i-- > 0)
-		pthread_join(philos[i]->trd, NULL);
-	i = args.num_of_philos;
-	while (i-- > 0)
-		pthread_mutex_destroy(&forks[i]);
-	free(forks);
-	philos_destroy(philos, args.num_of_philos);
+	if (ft_parse(argc, argv))
+		return (1);
+	init_super(argc, argv, &super);
+	init_philos(&super);
+	init_threads(&super);
+	ft_destroy(&super);
 	return (0);
 }

@@ -13,72 +13,63 @@
 #include "philo.h"
 
 /**
- * @brief Converts a string to an unsigned integer.
+ * @brief Converts a string to a int.
  *
  * @param str The string to convert.
- * @return The converted unsigned integer, or 0 if the string is invalid.
  *
- * This function checks if the string is a valid
- * representation of an unsigned integer.
- *
- * It returns 0 if the string is NULL, empty, or contains non-digit characters.
- * It also checks for overflow, returning 0 if the result exceeds UINT_MAX.
+ * @return The converted int value.
  */
-unsigned int	ft_uatoi(const char *str)
+int	ft_atoi(const char *str)
 {
-	unsigned int	num;
-	int				i;
+	int	num;
+	int	i;
+	int	sign;
 
-	if (!str || !*str)
-		return (0);
 	num = 0;
 	i = 0;
-	while (str[i])
+	sign = 1;
+	if (str[i] == '-' || str[i] == '+')
 	{
-		if (str[i] < '0' || str[i] > '9')
-			return (0);
-		num = num * 10 + (str[i] - '0');
-		if (num > UINT_MAX)
-			return (0);
+		if (str[i] == '-')
+			sign = -1;
 		i++;
 	}
-	return (num);
+	while (str[i])
+	{
+		num = num * 10 + (str[i] - '0');
+		i++;
+	}
+	return (num * sign);
 }
 
-t_ulong	get_time(void)
+size_t	ft_gettime(void)
 {
 	struct timeval	tv;
-	t_ulong			time;
 
 	gettimeofday(&tv, NULL);
-	time = (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
-	return (time);
+	return ((tv.tv_sec * 1000) + (tv.tv_usec / 1000));
 }
 
-void	ft_usleep(t_ulong time)
+void	ft_usleep(size_t time)
 {
-	t_ulong	start;
-	t_ulong	current;
+	size_t	start;
 
-	start = get_time();
-	while (true)
-	{
-		current = get_time();
-		if (current - start >= time)
-			break ;
-	}
+	start = ft_gettime();
+	while (ft_gettime() - start < time)
+		usleep(500);
 }
 
-void	*ft_calloc(size_t size)
+bool	ft_isnumeric(const char *str)
 {
-	void	*ptr;
-
-	ptr = malloc(size);
-	if (!ptr)
+	if (!str || !*str)
+		return (false);
+	if (*str == '+')
+		str++;
+	while (*str)
 	{
-		printf(RED "Error:" RESET " memory allocation failed\n");
-		exit(EXIT_FAILURE);
+		if (*str < '0' || *str > '9')
+			return (false);
+		str++;
 	}
-	memset(ptr, 0, size);
-	return (ptr);
+	return (true);
 }

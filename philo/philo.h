@@ -23,59 +23,77 @@
 # include <unistd.h>
 
 # define RED "\033[31m"
+# define YELLOW "\033[33m"
 # define BOLD "\033[1m"
 # define WHITE "\033[37m"
 # define RESET "\033[0m"
 
-typedef unsigned int	t_uint;
-typedef unsigned long	t_ulong;
-
-typedef struct s_args
-{
-	t_uint				num_of_philos;
-	t_uint				time_to_die;
-	t_uint				time_to_eat;
-	t_uint				time_to_sleep;
-	t_uint				num_of_meals;
-}						t_args;
-
-typedef struct s_super
-{
-	pthread_mutex_t		write;
-	bool				dead;
-	t_ulong				start_time;
-	pthread_t			trd;
-}						t_super;
+# define PHILO_MAX 2000
 
 typedef struct s_philo
 {
-	t_uint				id;
-	t_uint				num_of_philos;
-	t_uint				time_to_die;
-	t_uint				time_to_eat;
-	t_uint				time_to_sleep;
-	t_uint				num_of_meals;
-	t_ulong				start_time;
-	pthread_t			trd;
-	bool				thinking;
-	pthread_mutex_t		*write;
-	pthread_mutex_t		*lfork;
-	pthread_mutex_t		*rfork;
-}						t_philo;
+	int				id;
+	pthread_t		thread;
+	int				num_of_philos;
+	bool			is_eating;
+	bool			*dead_flag;
+	int				meals_eaten;
+	int				meals_to_eat;
+	size_t			time_to_die;
+	size_t			time_to_eat;
+	size_t			time_to_sleep;
+	size_t			start_time;
+	size_t			last_eaten_time;
+	pthread_mutex_t	*right_fork;
+	pthread_mutex_t	*left_fork;
+	pthread_mutex_t	*write_lock;
+	pthread_mutex_t	*meal_lock;
+	pthread_mutex_t	*dead_lock;
+}					t_philo;
 
-/* ************************************* */
-/*                utils                  */
-/* ************************************* */
-t_uint					ft_uatoi(const char *str);
-t_ulong					get_time(void);
-void					ft_usleep(t_ulong time);
-void					*ft_calloc(size_t size);
+typedef struct s_super
+{
+	t_philo			philos[PHILO_MAX];
+	pthread_mutex_t	forks[PHILO_MAX];
+	int				num_of_philos;
+	int				meals_to_eat;
+	size_t			time_to_die;
+	size_t			time_to_eat;
+	size_t			time_to_sleep;
+	bool			dead_flag;
+	pthread_mutex_t	write_lock;
+	pthread_mutex_t	meal_lock;
+	pthread_mutex_t	dead_lock;
+}					t_super;
 
-/* ************************************* */
-/*                philo                  */
-/* ************************************* */
-t_philo					**philos_init(t_args args, pthread_mutex_t *forks,
-							t_ulong start_time);
-void					philos_destroy(t_philo **philos, t_uint num_of_philos);
+// -----------------------------------
+// utils functions
+//
+// utils.c
+// -----------------------------------
+
+int					ft_atoi(const char *str);
+size_t				ft_gettime(void);
+void				ft_usleep(size_t time);
+bool				ft_isnumeric(const char *str);
+
+// -----------------------------------
+// init functions
+//
+// init.c
+// -----------------------------------
+
+void				init_super(int argc, char **argv, t_super *super);
+void				init_philos(t_super *super);
+void				init_threads(t_super *super);
+
+// -----------------------------------
+// routine functions
+//
+// routine.c
+// -----------------------------------
+
+void				*philo_routine(void *arg);
+void				*super_routine(void *arg);
 
 #endif // PHILO_H
