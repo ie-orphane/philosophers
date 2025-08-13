@@ -76,6 +76,7 @@ int					ft_atoi(const char *str);
 size_t				ft_gettime(void);
 void				ft_usleep(size_t time);
 bool				ft_isnumeric(const char *str);
+void				ft_msg(t_philo *philo, const char *msg);
 
 // -----------------------------------
 // init functions
@@ -90,7 +91,8 @@ void				init_threads(t_super *super);
 // -----------------------------------
 // routine functions
 //
-// routine.c
+// philo.c
+// super.c
 // -----------------------------------
 
 void				*philo_routine(void *arg);

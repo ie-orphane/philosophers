@@ -73,3 +73,17 @@ bool	ft_isnumeric(const char *str)
 	}
 	return (true);
 }
+
+void	ft_msg(t_philo *philo, const char *msg)
+{
+	bool	dead_flag;
+
+	pthread_mutex_lock(philo->dead_lock);
+	dead_flag = *philo->dead_flag;
+	pthread_mutex_unlock(philo->dead_lock);
+	if (dead_flag)
+		return ;
+	pthread_mutex_lock(philo->write_lock);
+	printf("%zu %d %s\n", ft_gettime() - philo->start_time, philo->id, msg);
+	pthread_mutex_unlock(philo->write_lock);
+}

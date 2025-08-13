@@ -12,10 +12,10 @@ NAME = philo
 
 CC = cc
 CFLAGS = -Wall -Wextra -Werror
-FFLAGS = -g3 -fsanitize=thread,undefined#,address
+FFLAGS = #-g3 -fsanitize=thread,undefined#,address
 
 INCLUDES = philo.h
-SOURCES = main.c utils.c init.c routine.c
+SOURCES = main.c utils.c init.c philo.c super.c
 OBJECTS = $(SOURCES:.c=.o)
 
 

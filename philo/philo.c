@@ -1,36 +1,18 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   routine.c                                          :+:      :+:    :+:   */
+/*   philo.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ielyatim <ielyatim@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/08/13 09:29:57 by ielyatim          #+#    #+#             */
-/*   Updated: 2025/08/13 09:29:58 by ielyatim         ###   ########.fr       */
+/*   Created: 2025/08/13 13:25:03 by ielyatim          #+#    #+#             */
+/*   Updated: 2025/08/13 13:25:49 by ielyatim         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-bool	is_dead(t_philo *philo)
-{
-	bool	dead_flag;
-
-	pthread_mutex_lock(philo->dead_lock);
-	dead_flag = *philo->dead_flag;
-	pthread_mutex_unlock(philo->dead_lock);
-	return (dead_flag);
-}
-
-void	ft_msg(t_philo *philo, const char *msg)
-{
-	pthread_mutex_lock(philo->write_lock);
-	if (!is_dead(philo))
-		printf("%zu %d %s\n", ft_gettime() - philo->start_time, philo->id, msg);
-	pthread_mutex_unlock(philo->write_lock);
-}
-
-void	assign_forks(t_philo *philo, pthread_mutex_t **first_fork,
+static void	assign_forks(t_philo *philo, pthread_mutex_t **first_fork,
 		pthread_mutex_t **second_fork)
 {
 	if (philo->left_fork < philo->right_fork)
@@ -45,7 +27,7 @@ void	assign_forks(t_philo *philo, pthread_mutex_t **first_fork,
 	}
 }
 
-void	eating(t_philo *philo)
+static void	eating(t_philo *philo)
 {
 	pthread_mutex_t	*first_fork;
 	pthread_mutex_t	*second_fork;
@@ -76,57 +58,22 @@ void	eating(t_philo *philo)
 void	*philo_routine(void *arg)
 {
 	t_philo	*philo;
+	bool	dead_flag;
 
 	philo = (t_philo *)arg;
-	// if (philo->id % 2 == 0)
-	// 	ft_usleep(1);
-	while (!is_dead(philo))
+	if (philo->id % 2 == 0)
+		ft_usleep(1);
+	while (true)
 	{
+		pthread_mutex_lock(philo->dead_lock);
+		dead_flag = *philo->dead_flag;
+		pthread_mutex_unlock(philo->dead_lock);
+		if (dead_flag)
+			break ;
 		eating(philo);
 		ft_msg(philo, "is sleeping");
 		ft_usleep(philo->time_to_sleep);
 		ft_msg(philo, "is thinking");
-	}
-	return (arg);
-}
-
-bool	check_meals(t_super *super)
-{
-	int	philo_ate;
-	int	i;
-
-	if (super->meals_to_eat < 0)
-		return (false);
-	philo_ate = 0;
-	i = 0;
-	while (i < super->num_of_philos)
-	{
-		pthread_mutex_lock(&super->meal_lock);
-		if (!super->philos[i].is_eating
-			&& super->philos[i].meals_eaten == super->meals_to_eat)
-			philo_ate++;
-		pthread_mutex_unlock(&super->meal_lock);
-		i++;
-	}
-	if (philo_ate == super->num_of_philos)
-	{
-		pthread_mutex_lock(&super->dead_lock);
-		super->dead_flag = true;
-		pthread_mutex_unlock(&super->dead_lock);
-		return (true);
-	}
-	return (false);
-}
-
-void	*super_routine(void *arg)
-{
-	t_super	*super;
-
-	super = (t_super *)arg;
-	while (true)
-	{
-		if (check_meals(super))
-			break ;
 	}
 	return (arg);
 }
