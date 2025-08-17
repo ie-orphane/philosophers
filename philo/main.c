@@ -31,7 +31,7 @@ static bool	ft_parse(int argc, char **argv)
 	i = 1;
 	while (i < argc)
 	{
-		if (!ft_isnumeric(argv[i]) || ft_atoi(argv[i]) <= 0)
+		if (!ft_isnumeric(argv[i]) || (ft_atoi(argv[i]) <= 0 && i != 5))
 		{
 			ft_err(RED "Error:" RESET " Invalid argument: " BOLD WHITE);
 			ft_err(argv[i]);
