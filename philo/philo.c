@@ -24,14 +24,16 @@ static void	eating(t_philo *philo)
 	}
 	pthread_mutex_lock(philo->left_fork);
 	ft_msg(philo, "has taken a fork");
+	pthread_mutex_lock(philo->meal_lock);
 	philo->is_eating = true;
 	ft_msg(philo, "is eating");
-	pthread_mutex_lock(philo->meal_lock);
 	philo->last_eaten_time = ft_gettime();
-	philo->meals_eaten++;
+	philo->meals_eaten += 1;
 	pthread_mutex_unlock(philo->meal_lock);
 	ft_usleep(philo->time_to_eat);
+	pthread_mutex_lock(philo->meal_lock);
 	philo->is_eating = false;
+	pthread_mutex_unlock(philo->meal_lock);
 	pthread_mutex_unlock(philo->left_fork);
 	pthread_mutex_unlock(philo->right_fork);
 }
@@ -52,6 +54,12 @@ void	*philo_routine(void *arg)
 		if (dead_flag)
 			break ;
 		eating(philo);
+		pthread_mutex_lock(philo->meal_lock);
+		dead_flag = philo->meals_to_eat > 0 && !philo->is_eating
+			&& philo->meals_eaten >= philo->meals_to_eat;
+		pthread_mutex_unlock(philo->meal_lock);
+		if (dead_flag)
+			break ;
 		ft_msg(philo, "is sleeping");
 		ft_usleep(philo->time_to_sleep);
 		ft_msg(philo, "is thinking");

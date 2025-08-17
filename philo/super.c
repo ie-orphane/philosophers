@@ -25,7 +25,7 @@ static bool	check_meals(t_super *super)
 	{
 		pthread_mutex_lock(&super->meal_lock);
 		if (!super->philos[i].is_eating
-			&& super->philos[i].meals_eaten == super->meals_to_eat)
+			&& super->philos[i].meals_eaten >= super->meals_to_eat)
 			philo_ate++;
 		pthread_mutex_unlock(&super->meal_lock);
 		i++;
@@ -73,6 +73,7 @@ void	*super_routine(void *arg)
 	{
 		if (check_starvation(super) || check_meals(super))
 			break ;
+		usleep(10);
 	}
 	return (arg);
 }
